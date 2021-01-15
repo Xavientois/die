@@ -4,6 +4,7 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
+#[cfg(not(feature = "test"))]
 use std::process;
 
 /// const of 1
@@ -22,49 +23,49 @@ pub const DEFAULT_EXIT_CODE: i32 = 1;
 /// Basic usage:
 ///
 /// ```{.should_panic}
-/// # use die::die;
+/// # use die_exit::*;
 /// die!("argument to -e must be numeric"); // prints message to stderr then exits with code 1
 /// ```
 /// With custom error code:
 /// ```{.should_panic}
-/// # use die::die;
+/// # use die_exit::*;
 /// die!(2; "argument to -e must be numeric"); // prints message to stderr then exits with code 2
 /// ```
 /// error code can go at the beginning or end, just separate with colon:
 /// ```{.should_panic}
-/// # use die::die;
+/// # use die_exit::*;
 /// die!("argument to -e must be numeric"; 3); // prints message to stderr then exits with code 3
 /// ```
 /// supports all the formatting eprintln! does:
 /// ```{.should_panic}
-/// # use die::die;
+/// # use die_exit::*;
 /// die!("argument {} must be {}", "-e", 1; 4); // prints `argument -e must be 1` to stderr then exits with code 4
 /// ```
 /// supports all the formatting eprintln! does without exit code too:
 /// ```{.should_panic}
-/// # use die::die;
+/// # use die_exit::*;
 /// die!("argument {} must be {}", "-e", 1); // prints `argument -e must be 1` to stderr then exits with code 1
 /// ```
 /// just exit with a code alone:
 /// ```{.should_panic}
-/// # use die::die;
+/// # use die_exit::*;
 /// die!(2); // prints nothing, only exits with code 3
 /// ```
 /// just exit:
 /// ```{.should_panic}
-/// # use die::die;
+/// # use die_exit::*;
 /// die!(); // prints nothing, only exits with code 1
 /// ```
 #[macro_export]
 macro_rules! die {
     () => (
         #[cfg(feature = "test")]
-        panic!("Exited with code {}", ::die::DEFAULT_EXIT_CODE)
+        { panic!("Exited with code {}", ::die_exit::DEFAULT_EXIT_CODE) }
         #[cfg(not(feature = "test"))]
-        ::std::process::exit(::die::DEFAULT_EXIT_CODE)
+        { ::std::process::exit(::die_exit::DEFAULT_EXIT_CODE) }
     );
-    ($x:expr) => (::die::PrintExit::print_exit(&$x));
-    ($x:expr; $y:expr) => (::die::PrintExit::print_exit(&($x, $y)));
+    ($x:expr) => (::die_exit::PrintExit::print_exit(&$x));
+    ($x:expr; $y:expr) => (::die_exit::PrintExit::print_exit(&($x, $y)));
     ($x:expr; $($y:expr),+) => ({
         eprintln!($($y),+);
         #[cfg(feature = "test")]
@@ -75,16 +76,16 @@ macro_rules! die {
     ($($y:expr),+; $x:expr) => ({
         eprintln!($($y),+);
         #[cfg(feature = "test")]
-        panic!("Exited with code {}", $x)
+        { panic!("Exited with code {}", $x) }
         #[cfg(not(feature = "test"))]
-        ::std::process::exit($x)
+        { ::std::process::exit($x) }
     });
     ($($arg:tt)*) => ({
         eprintln!($($arg)*);
         #[cfg(feature = "test")]
-        panic!("Exited with code {}", ::die::DEFAULT_EXIT_CODE)
+        { panic!("Exited with code {}", ::die_exit::DEFAULT_EXIT_CODE) }
         #[cfg(not(feature = "test"))]
-        ::std::process::exit(::die::DEFAULT_EXIT_CODE)
+        { ::std::process::exit(::die_exit::DEFAULT_EXIT_CODE) }
     });
 }
 
@@ -114,12 +115,12 @@ pub trait Die<T> {
     /// Basic usage:
     ///
     /// ```{.should_panic}
-    /// # use die::Die;
+    /// # use die_exit::Die;
     /// let x: Result<u32, &str> = Err("emergency failure");
     /// x.die("strange error"); // prints `strange error` to stderr then exits with code 1
     /// ```
     /// ```{.should_panic}
-    /// # use die::Die;
+    /// # use die_exit::Die;
     /// let x: Option<u32> = None;
     /// x.die("strange error"); // prints `strange error` to stderr then exits with code 1
     /// ```
@@ -146,12 +147,12 @@ pub trait Die<T> {
     /// Basic usage:
     ///
     /// ```{.should_panic}
-    /// # use die::Die;
+    /// # use die_exit::Die;
     /// let x: Result<u32, &str> = Err("emergency failure");
     /// x.die_code("strange", 3); // prints `strange` to stderr then exits with code 3
     /// ```
     /// ```{.should_panic}
-    /// # use die::Die;
+    /// # use die_exit::Die;
     /// let x: Option<u32> = None;
     /// x.die_code("strange", 3); // prints `strange` to stderr then exits with code 3
     /// ```

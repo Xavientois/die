@@ -16,10 +16,9 @@ jobs:
       - uses: actions-rs/cargo@v1
         with:
           command: check
-          args: --release
 
   check:
-    name: Dev Check
+    name: Test Check
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -31,9 +30,10 @@ jobs:
       - uses: actions-rs/cargo@v1
         with:
           command: check
+          args: --features test
 
   test:
-    name: Test Suite
+    name: Release Test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -45,6 +45,21 @@ jobs:
       - uses: actions-rs/cargo@v1
         with:
           command: test
+
+  test_test:
+    name: Test Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+      - uses: actions-rs/cargo@v1
+        with:
+          command: test
+          args: --features test
 
   fmt:
     name: Rustfmt
@@ -78,3 +93,20 @@ jobs:
         with:
           command: clippy
           args: -- -D warnings
+
+  test_clippy:
+    name: Test Clippy
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+      - run: rustup component add clippy
+      - uses: actions-rs/cargo@v1
+        with:
+          command: clippy
+          args: -- -D warnings --features test
