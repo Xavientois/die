@@ -57,19 +57,33 @@ pub const DEFAULT_EXIT_CODE: i32 = 1;
 /// ```
 #[macro_export]
 macro_rules! die {
-    () => (::std::process::exit(::die::DEFAULT_EXIT_CODE));
+    () => (
+        #[cfg(feature = "test")]
+        panic!("Exited with code {}", ::die::DEFAULT_EXIT_CODE)
+        #[cfg(not(feature = "test"))]
+        ::std::process::exit(::die::DEFAULT_EXIT_CODE)
+    );
     ($x:expr) => (::die::PrintExit::print_exit(&$x));
     ($x:expr; $y:expr) => (::die::PrintExit::print_exit(&($x, $y)));
     ($x:expr; $($y:expr),+) => ({
         eprintln!($($y),+);
+        #[cfg(feature = "test")]
+        panic!("Exited with code {}", $x)
+        #[cfg(not(feature = "test"))]
         ::std::process::exit($x)
     });
     ($($y:expr),+; $x:expr) => ({
         eprintln!($($y),+);
+        #[cfg(feature = "test")]
+        panic!("Exited with code {}", $x)
+        #[cfg(not(feature = "test"))]
         ::std::process::exit($x)
     });
     ($($arg:tt)*) => ({
         eprintln!($($arg)*);
+        #[cfg(feature = "test")]
+        panic!("Exited with code {}", ::die::DEFAULT_EXIT_CODE)
+        #[cfg(not(feature = "test"))]
         ::std::process::exit(::die::DEFAULT_EXIT_CODE)
     });
 }
@@ -179,6 +193,9 @@ pub trait PrintExit {
 impl PrintExit for i32 {
     #[inline]
     fn print_exit(&self) -> ! {
+        #[cfg(feature = "test")]
+        panic!("Exited with code {}", *self);
+        #[cfg(not(feature = "test"))]
         process::exit(*self)
     }
 }
@@ -187,6 +204,9 @@ impl PrintExit for &str {
     #[inline]
     fn print_exit(&self) -> ! {
         eprintln!("{}", self);
+        #[cfg(feature = "test")]
+        panic!("Exited with code {}", DEFAULT_EXIT_CODE);
+        #[cfg(not(feature = "test"))]
         process::exit(DEFAULT_EXIT_CODE)
     }
 }
@@ -195,6 +215,9 @@ impl PrintExit for String {
     #[inline]
     fn print_exit(&self) -> ! {
         eprintln!("{}", self);
+        #[cfg(feature = "test")]
+        panic!("Exited with code {}", DEFAULT_EXIT_CODE);
+        #[cfg(not(feature = "test"))]
         process::exit(DEFAULT_EXIT_CODE)
     }
 }
@@ -203,6 +226,9 @@ impl PrintExit for (i32, &str) {
     #[inline]
     fn print_exit(&self) -> ! {
         eprintln!("{}", self.1);
+        #[cfg(feature = "test")]
+        panic!("Exited with code {}", self.0);
+        #[cfg(not(feature = "test"))]
         process::exit(self.0)
     }
 }
@@ -211,6 +237,9 @@ impl PrintExit for (i32, String) {
     #[inline]
     fn print_exit(&self) -> ! {
         eprintln!("{}", self.1);
+        #[cfg(feature = "test")]
+        panic!("Exited with code {}", self.0);
+        #[cfg(not(feature = "test"))]
         process::exit(self.0)
     }
 }
@@ -219,6 +248,9 @@ impl PrintExit for (&str, i32) {
     #[inline]
     fn print_exit(&self) -> ! {
         eprintln!("{}", self.0);
+        #[cfg(feature = "test")]
+        panic!("Exited with code {}", self.1);
+        #[cfg(not(feature = "test"))]
         process::exit(self.1)
     }
 }
@@ -227,6 +259,9 @@ impl PrintExit for (String, i32) {
     #[inline]
     fn print_exit(&self) -> ! {
         eprintln!("{}", self.0);
+        #[cfg(feature = "test")]
+        panic!("Exited with code {}", self.1);
+        #[cfg(not(feature = "test"))]
         process::exit(self.1)
     }
 }
