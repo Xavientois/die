@@ -2,7 +2,7 @@
 
 ![GitHub](https://img.shields.io/github/license/Xavientois/die)
 ![GitHub Workflow Status](https://github.com/Xavientois/die/workflows/tests/badge.svg)
-[![Latest Version](https://img.shields.io/crates/v/die.svg)](https://crates.io/crates/die)
+[![Latest Version](https://img.shields.io/crates/v/die-exit.svg)](https://crates.io/crates/die-exit)
 [![Documentation](https://docs.rs/die-exit/badge.svg)](https://docs.rs/die-exit)
 
 [die-exit] is a simple Rust library to make it easy to handle errors and exit in command line programs.
@@ -27,7 +27,7 @@ die-exit = {
 ## Example usage:
 
 ```rust
-use die::Die;
+use die_exit::*;
 // Result:
 Ok(1).die("no number"); // unwraps to 1 successfully
 Err("failure").die("strange error"); // prints `strange error` to stderr then exits with code 1
@@ -70,7 +70,7 @@ mod tests {
 ## `cargo` Features
 - **test**: Turn this on if you want to run tests where `die` might be used.
   This will change the behaviour of `die` and its variants to call `panic!()`
-  instead of `process::extit()`.
+  instead of `process::exit()`.
 
 # License
 
