@@ -8,7 +8,7 @@ authors = [
 description = "Handle errors and exit in command line programs easily."
 repository = "https://github.com/Xavientois/die"
 keywords = ["die", "stderr", "cmd", "cmdline", "exit"]
-categories = ["Command line utilities"]
+categories = ["command-line-utilities"]
 license = "MIT"
 
 [features]
