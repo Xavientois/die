@@ -17,11 +17,9 @@ exit behaviour with a call to `panic!` in order to facilitate testing.
 [dependencies]
 die-exit = "0.3"
 
-[dev.dependencies]
-die-exit = {
-  version = "0.3"
-  features = ["test"]
-}
+[dev-dependencies.die-exit]
+version = "0.3"
+features = ["test"]
 ```
 
 ## Example usage:
