@@ -1,20 +1,30 @@
-# die
+# die-exit
 
-[![Build Status](https://ci.moparisthe.best/job/moparisthebest/job/die/job/master/badge/icon%3Fstyle=plastic)](https://ci.moparisthe.best/job/moparisthebest/job/die/job/master/)
+![GitHub](https://img.shields.io/github/license/Xavientois/die)
+![GitHub Workflow Status](https://github.com/Xavientois/die/workflows/tests/badge.svg)
 [![Latest Version](https://img.shields.io/crates/v/die.svg)](https://crates.io/crates/die)
-[![Documentation](https://docs.rs/die/badge.svg)](https://docs.rs/die)
+[![Documentation](https://docs.rs/die-exit/badge.svg)](https://docs.rs/die-exit)
 
-[die] is a simple Rust library to make it easy to handle errors and exit in command line programs.
+[die-exit] is a simple Rust library to make it easy to handle errors and exit in command line programs.
+It is forked from the [die] library, but includes an additional `test` feature which will replace
+exit behaviour with a call to `panic!` in order to facilitate testing.
 
 [die]: https://code.moparisthebest.com/moparisthebest/die
+[die-exit]: https://github.com/Xavientois/die
 
+## Cargo.toml
 ```toml
-# Cargo.toml
 [dependencies]
-die = "0.2"
+die-exit = "0.3"
+
+[dev.dependencies]
+die-exit = {
+  version = "0.3"
+  features = ["test"]
+}
 ```
 
-Example usage:
+## Example usage:
 
 ```rust
 use die::Die;
@@ -22,7 +32,7 @@ use die::Die;
 Ok(1).die("no number"); // unwraps to 1 successfully
 Err("failure").die("strange error"); // prints `strange error` to stderr then exits with code 1
 
-// Option: 
+// Option:
 Some(1).die("no number"); // unwraps to 1 successfully
 None.die("none option"); // prints `none option` to stderr then exits with code 1
 
@@ -40,19 +50,29 @@ die!(2); // prints nothing, only exits with code 3
 die!(); // prints nothing, only exits with code 1
 ```
 
+## Example testing:
+
+Ensure that the `test` feature is turned on.
+```rust
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use die_exit::*;
+
+    #[test]
+    #[should_panic]
+    fn die_test() {
+        die!("Die works in tests!"; exit_codes::COMPILER_ERROR);
+    }
+}
+```
+
+## `cargo` Features
+- **test**: Turn this on if you want to run tests where `die` might be used.
+  This will change the behaviour of `die` and its variants to call `panic!()`
+  instead of `process::extit()`.
+
 # License
 
-This project is licensed under either of
-
- * Apache License, Version 2.0, ([LICENSE-APACHE](LICENSE-APACHE) or
-   http://www.apache.org/licenses/LICENSE-2.0)
- * MIT license ([LICENSE-MIT](LICENSE-MIT) or
+This project is licensed under the MIT license ([LICENSE-MIT](LICENSE-MIT)
    http://opensource.org/licenses/MIT)
-
-at your option.
-
-### Contribution
-
-Unless you explicitly state otherwise, any contribution intentionally submitted
-for inclusion in die by you, as defined in the Apache-2.0 license, shall be
-dual licensed as above, without any additional terms or conditions.
