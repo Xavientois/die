@@ -56,39 +56,46 @@ pub const DEFAULT_EXIT_CODE: i32 = 1;
 /// # use die_exit::*;
 /// die!(); // prints nothing, only exits with code 1
 /// ```
+#[cfg(not(feature = "test"))]
+#[macro_export]
+macro_rules! die {
+    () => (::std::process::exit(::die_exit::DEFAULT_EXIT_CODE));
+    ($x:expr) => (::die_exit::PrintExit::print_exit(&$x));
+    ($x:expr; $y:expr) => (::die_exit::PrintExit::print_exit(&($x, $y)));
+    ($x:expr; $($y:expr),+) => ({
+        eprintln!($($y),+);
+        ::std::process::exit($x)
+    });
+    ($($y:expr),+; $x:expr) => ({
+        eprintln!($($y),+);
+        ::std::process::exit($x)
+    });
+    ($($arg:tt)*) => ({
+        eprintln!($($arg)*);
+        ::std::process::exit(::die_exit::DEFAULT_EXIT_CODE)
+    });
+}
+#[cfg(feature = "test")]
 #[macro_export]
 macro_rules! die {
     () => (
-        #[cfg(feature = "test")]
-        { panic!("Exited with code {}", ::die_exit::DEFAULT_EXIT_CODE) }
-        #[cfg(not(feature = "test"))]
-        { ::std::process::exit(::die_exit::DEFAULT_EXIT_CODE) }
+        panic!("Exited with code {}", ::die_exit::DEFAULT_EXIT_CODE)
     );
     ($x:expr) => (::die_exit::PrintExit::print_exit(&$x));
     ($x:expr; $y:expr) => (::die_exit::PrintExit::print_exit(&($x, $y)));
     ($x:expr; $($y:expr),+) => ({
         eprintln!($($y),+);
-        #[cfg(feature = "test")]
         panic!("Exited with code {}", $x)
-        #[cfg(not(feature = "test"))]
-        ::std::process::exit($x)
     });
     ($($y:expr),+; $x:expr) => ({
         eprintln!($($y),+);
-        #[cfg(feature = "test")]
-        { panic!("Exited with code {}", $x) }
-        #[cfg(not(feature = "test"))]
-        { ::std::process::exit($x) }
+        panic!("Exited with code {}", $x)
     });
     ($($arg:tt)*) => ({
         eprintln!($($arg)*);
-        #[cfg(feature = "test")]
-        { panic!("Exited with code {}", ::die_exit::DEFAULT_EXIT_CODE) }
-        #[cfg(not(feature = "test"))]
-        { ::std::process::exit(::die_exit::DEFAULT_EXIT_CODE) }
+        panic!("Exited with code {}", ::die_exit::DEFAULT_EXIT_CODE)
     });
 }
-
 /// `Die` is a trait implemented on [`Result`] and [`Option`] to make exiting with messages and codes easy
 ///
 /// [`Result`]: https://doc.rust-lang.org/std/result/enum.Result.html

@@ -2,7 +2,7 @@ extern crate die_exit;
 use die_exit::*;
 
 #[test]
-#[should_panic]
+#[should_panic(expected = "Exited with code 42")]
 fn die_with_print_selector() {
     die!("Escape invalid character: '{}'", '_'; 42);
 }
