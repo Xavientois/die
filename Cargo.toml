@@ -1,6 +1,6 @@
 [package]
 name = "die-exit"
-version = "0.3.2"
+version = "0.3.3"
 authors = [
   "moparisthebest <admin@moparisthebest.com>",
   "Xavientois <joshua.rampersad@hotmail.com>",
