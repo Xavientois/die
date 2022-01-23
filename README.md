@@ -38,6 +38,10 @@ None.die("none option"); // prints `none option` to stderr then exits with code 
 Err("failure").die_code("strange error", 4); // prints `strange error` to stderr then exits with code 4
 None.die_code("none option", 5); // prints `none option` to stderr then exits with code 5
 
+// with function (Result only):
+Err("failure").die_with(|error| format!("strange error: {}", error)); // prints `strange error: failure` to stderr then exits with code 1
+Err("failure").die_with(|error| (format!("strange error: {}", error), 6)); // prints `strange error: failure` to stderr then exits with code 6
+
 // die! macro:
 die!("argument to -e must be numeric"); // prints message to stderr then exits with code 1
 die!(2; "argument to -e must be numeric"); // prints message to stderr then exits with code 2
