@@ -100,7 +100,7 @@ macro_rules! die {
 ///
 /// [`Result`]: https://doc.rust-lang.org/std/result/enum.Result.html
 /// [`Option`]: https://doc.rust-lang.org/std/option/enum.Option.html
-pub trait Die<T, E> {
+pub trait Die<T> {
     /// Unwraps a [`Result`] or [`Option`], yielding the content of an [`Ok`] or [`Some`].
     ///
     /// # Exits
@@ -164,11 +164,43 @@ pub trait Die<T, E> {
     /// x.die_code("strange", 3); // prints `strange` to stderr then exits with code 3
     /// ```
     fn die_code(self, msg: &str, exit_code: i32) -> T;
-
-    fn die_with<X: PrintExit>(self, func: fn(E) -> X) -> T;
 }
 
-impl<T, E> Die<T, E> for Result<T, E> {
+/// `DieWith` is a trait implemented on [`Result`] only to make exiting with messages and codes easy
+///
+/// [`Result`]: https://doc.rust-lang.org/std/result/enum.Result.html
+pub trait DieWith<T, E> {
+    /// Unwraps a [`Result`], yielding the content of an [`Ok`].
+    ///
+    /// # Exits
+    ///
+    /// Calls [process::exit(exit_code)][exit] if the value is an [`Err`], after printing the
+    /// message produced by the given function to [`stderr`].
+    ///
+    /// [`stderr`]: https://doc.rust-lang.org/std/io/fn.stderr.html
+    /// [exit]: https://doc.rust-lang.org/std/process/fn.exit.html
+    /// [`Result`]: https://doc.rust-lang.org/std/result/enum.Result.html
+    /// [`Ok`]: https://doc.rust-lang.org/std/result/enum.Result.html#variant.Ok
+    /// [`Err`]: https://doc.rust-lang.org/std/result/enum.Result.html#variant.Err
+    ///
+    /// # Examples
+    ///
+    /// Basic usage:
+    ///
+    /// ```{.should_panic}
+    /// # use die_exit::DieWith;
+    /// let x: Result<u32, &str> = Err("emergency failure");
+    /// x.die_with(|err| format!("strange: {}", err)); // prints `strange: emergency failure` to stderr then exits with code 1
+    /// ```
+    /// ```{.should_panic}
+    /// # use die_exit::DieWith;
+    /// let x: Result<u32, &str> = Err("emergency failure");
+    /// x.die_with(|err| (format!("strange: {}", err), 3)); // prints `strange: emergency failure` to stderr then exits with code 3
+    /// ```
+    fn die_with<X: PrintExit, F: FnOnce(E) -> X>(self, func: F) -> T;
+}
+
+impl<T, E> Die<T> for Result<T, E> {
     #[inline]
     fn die(self, msg: &str) -> T {
         self.die_code(msg, DEFAULT_EXIT_CODE)
@@ -180,16 +212,9 @@ impl<T, E> Die<T, E> for Result<T, E> {
             Err(_) => PrintExit::print_exit(&(exit_code, msg)),
         }
     }
-
-    fn die_with<X: PrintExit>(self, func: fn(E) -> X) -> T {
-        match self {
-            Ok(t) => t,
-            Err(err) => PrintExit::print_exit(&func(err))
-        }
-    }
 }
 
-impl<T> Die<T, ()> for Option<T> {
+impl<T> Die<T> for Option<T> {
     #[inline]
     fn die(self, msg: &str) -> T {
         self.die_code(msg, DEFAULT_EXIT_CODE)
@@ -201,11 +226,14 @@ impl<T> Die<T, ()> for Option<T> {
             None => PrintExit::print_exit(&(exit_code, msg)),
         }
     }
+}
 
-    fn die_with<X: PrintExit>(self, func: fn(()) -> X) -> T {
+impl<T, E> DieWith<T, E> for Result<T, E> {
+    #[inline]
+    fn die_with<X: PrintExit, F: FnOnce(E) -> X>(self, func: F) -> T {
         match self {
-            Some(t) => t,
-            None => PrintExit::print_exit(&func(()))
+            Ok(t) => t,
+            Err(err) => PrintExit::print_exit(&func(err)),
         }
     }
 }
