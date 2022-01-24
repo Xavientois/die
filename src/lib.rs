@@ -166,6 +166,40 @@ pub trait Die<T> {
     fn die_code(self, msg: &str, exit_code: i32) -> T;
 }
 
+/// `DieWith` is a trait implemented on [`Result`] only to make exiting with messages and codes easy
+///
+/// [`Result`]: https://doc.rust-lang.org/std/result/enum.Result.html
+pub trait DieWith<T, E> {
+    /// Unwraps a [`Result`], yielding the content of an [`Ok`].
+    ///
+    /// # Exits
+    ///
+    /// Calls [process::exit(exit_code)][exit] if the value is an [`Err`], after printing the
+    /// message produced by the given function to [`stderr`].
+    ///
+    /// [`stderr`]: https://doc.rust-lang.org/std/io/fn.stderr.html
+    /// [exit]: https://doc.rust-lang.org/std/process/fn.exit.html
+    /// [`Result`]: https://doc.rust-lang.org/std/result/enum.Result.html
+    /// [`Ok`]: https://doc.rust-lang.org/std/result/enum.Result.html#variant.Ok
+    /// [`Err`]: https://doc.rust-lang.org/std/result/enum.Result.html#variant.Err
+    ///
+    /// # Examples
+    ///
+    /// Basic usage:
+    ///
+    /// ```{.should_panic}
+    /// # use die_exit::DieWith;
+    /// let x: Result<u32, &str> = Err("emergency failure");
+    /// x.die_with(|err| format!("strange: {}", err)); // prints `strange: emergency failure` to stderr then exits with code 1
+    /// ```
+    /// ```{.should_panic}
+    /// # use die_exit::DieWith;
+    /// let x: Result<u32, &str> = Err("emergency failure");
+    /// x.die_with(|err| (format!("strange: {}", err), 3)); // prints `strange: emergency failure` to stderr then exits with code 3
+    /// ```
+    fn die_with<X: PrintExit, F: FnOnce(E) -> X>(self, func: F) -> T;
+}
+
 impl<T, E> Die<T> for Result<T, E> {
     #[inline]
     fn die(self, msg: &str) -> T {
@@ -190,6 +224,16 @@ impl<T> Die<T> for Option<T> {
         match self {
             Some(t) => t,
             None => PrintExit::print_exit(&(exit_code, msg)),
+        }
+    }
+}
+
+impl<T, E> DieWith<T, E> for Result<T, E> {
+    #[inline]
+    fn die_with<X: PrintExit, F: FnOnce(E) -> X>(self, func: F) -> T {
+        match self {
+            Ok(t) => t,
+            Err(err) => PrintExit::print_exit(&func(err)),
         }
     }
 }

@@ -18,3 +18,10 @@ fn die_with_code_first() {
 fn die_empty() {
     die!();
 }
+
+#[test]
+#[should_panic]
+fn die_with_capture() {
+    let code = 3;
+    Result::<(), &str>::Err("error text").die_with(|error| (format!("Error is: {}", error), code));
+}
