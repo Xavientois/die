@@ -13,16 +13,17 @@ exit behaviour with a call to `panic!` in order to facilitate testing.
 [die-exit]: https://github.com/Xavientois/die
 
 ## Cargo.toml
+
 ```toml
 [dependencies]
-die-exit = "0.3"
+die-exit = "0.4"
 
 [dev-dependencies.die-exit]
-version = "0.3"
-features = ["test"]
+version = "0.4"
+features = ["test", "red"]
 ```
 
-## Example usage:
+## Example usage
 
 ```rust
 use die_exit::*;
@@ -52,9 +53,10 @@ die!(2); // prints nothing, only exits with code 3
 die!(); // prints nothing, only exits with code 1
 ```
 
-## Example testing:
+## Example testing
 
 Ensure that the `test` feature is turned on.
+
 ```rust
 #[cfg(test)]
 mod tests {
@@ -70,11 +72,13 @@ mod tests {
 ```
 
 ## `cargo` Features
+
 - **test**: Turn this on if you want to run tests where `die` might be used.
   This will change the behaviour of `die` and its variants to call `panic!()`
   instead of `process::exit()`.
+- **red**: Red and bold output.
 
-# License
+## License
 
 This project is licensed under the MIT license ([LICENSE-MIT](LICENSE-MIT)
-   http://opensource.org/licenses/MIT)
+http://opensource.org/licenses/MIT)
