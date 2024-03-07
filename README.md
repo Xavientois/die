@@ -16,10 +16,10 @@ exit behaviour with a call to `panic!` in order to facilitate testing.
 
 ```toml
 [dependencies]
-die-exit = "0.4"
+die-exit = "0.5"
 
 [dev-dependencies.die-exit]
-version = "0.4"
+version = "0.5"
 features = ["test", "red"]
 ```
 
