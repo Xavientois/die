@@ -10,6 +10,14 @@ use std::process;
 /// const of 1
 pub const DEFAULT_EXIT_CODE: i32 = 1;
 
+#[cfg(feature = "red")]
+macro_rules! eprintln {
+    ($($arg:tt)*) => {
+        use std::io::Write;
+        writeln!(&mut ::std::io::stderr(), "\u{001b}[91;49;1m{}\u{001b}[0m", format!($($arg)*)).expect("failed printing to stderr");
+    };
+}
+
 /// Prints a message to [`stderr`] and terminates the current process with the specified exit code
 /// or 1 if no exit code is specified, by calling [`eprintln`]!() on all arguments followed by
 /// [process::exit(exit_code)][exit]
